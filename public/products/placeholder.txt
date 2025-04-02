@@ -1,0 +1,10 @@
+
+This folder contains product images for the PurpleGlass e-commerce store.
+
+Images needed:
+- headphones.png - Nebula Wireless Headphones
+- smartwatch.png - Astro Smart Watch
+- speaker.png - Quantum Portable Speaker
+- earbuds.png - Infinity Wireless Earbuds
+
+Please add your actual product images to this folder with these filenames.
