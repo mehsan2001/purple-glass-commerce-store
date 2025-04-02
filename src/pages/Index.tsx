@@ -5,6 +5,14 @@ import Layout from '@/components/layout/Layout';
 import ProductGrid from '@/components/products/ProductGrid';
 import { Button } from '@/components/ui/button';
 import { products } from '@/data/products';
+import { 
+  Carousel,
+  CarouselContent, 
+  CarouselItem, 
+  CarouselPrevious, 
+  CarouselNext 
+} from '@/components/ui/carousel';
+import ProductCard from '@/components/products/ProductCard';
 
 const Index = () => {
   // Show only 4 products on the homepage
@@ -57,7 +65,20 @@ const Index = () => {
               <Link to="/products">View all products</Link>
             </Button>
           </div>
-          <ProductGrid products={featuredProducts} />
+          
+          <Carousel className="w-full">
+            <CarouselContent className="-ml-2 md:-ml-4">
+              {featuredProducts.map((product) => (
+                <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+                  <ProductCard product={product} />
+                </CarouselItem>
+              ))}
+            </CarouselContent>
+            <div className="flex justify-center mt-6 gap-2">
+              <CarouselPrevious className="relative static left-0 right-auto translate-y-0 bg-purple-light/20 hover:bg-purple-light/30 border-white/10" />
+              <CarouselNext className="relative static right-0 left-auto translate-y-0 bg-purple-light/20 hover:bg-purple-light/30 border-white/10" />
+            </div>
+          </Carousel>
         </div>
       </section>
 
