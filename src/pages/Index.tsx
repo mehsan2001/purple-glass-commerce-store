@@ -15,8 +15,8 @@ import {
 import ProductCard from '@/components/products/ProductCard';
 
 const Index = () => {
-  // Show only 4 products on the homepage
-  const featuredProducts = products.slice(0, 4);
+  // Show 6 products on the homepage instead of 4
+  const featuredProducts = products.slice(0, 6);
 
   return (
     <Layout>
