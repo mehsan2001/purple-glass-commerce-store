@@ -1,9 +1,9 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ShoppingCart, Menu, X } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { useCart } from '@/context/CartContext';
+import Logo from './Logo';
 
 const Navbar: React.FC = () => {
   const { cartItems } = useCart();
@@ -14,9 +14,7 @@ const Navbar: React.FC = () => {
   return (
     <header className="sticky top-0 z-40 w-full glass border-b border-purple-light/10">
       <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-        <Link to="/" className="text-2xl font-bold text-white hover:text-purple-light transition">
-          PurpleGlass
-        </Link>
+        <Logo />
 
         {/* Desktop Navigation */}
         <nav className="hidden md:flex items-center space-x-8">
