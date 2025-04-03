@@ -3,9 +3,14 @@ require('dotenv').config();
 const express = require('express');
 const cors = require('cors');
 const apiRoutes = require('./routes/api');
+const { errorHandler, notFoundHandler } = require('./middleware/error.middleware');
+const { testConnection } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+// Test database connection
+testConnection();
 
 // Middleware
 app.use(cors());
@@ -20,11 +25,11 @@ app.get('/', (req, res) => {
   res.send('PurpleGlass API is running');
 });
 
+// 404 handler
+app.use(notFoundHandler);
+
 // Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ message: 'Something went wrong!' });
-});
+app.use(errorHandler);
 
 // Start server
 app.listen(PORT, () => {
