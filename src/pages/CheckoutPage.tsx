@@ -9,6 +9,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Separator } from '@/components/ui/separator';
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
 import { useCart } from '@/context/CartContext';
 import { CustomerInfo } from '@/types';
 import { toast } from 'sonner';
@@ -21,6 +22,9 @@ const formSchema = z.object({
   city: z.string().min(2, { message: 'City must be at least 2 characters' }),
   zipCode: z.string().min(3, { message: 'Zip code must be at least 3 characters' }),
   country: z.string().min(2, { message: 'Country must be at least 2 characters' }),
+  paymentMethod: z.enum(['cod', 'bank_transfer'], {
+    required_error: 'Please select a payment method',
+  }),
 });
 
 const CheckoutPage = () => {
@@ -37,6 +41,7 @@ const CheckoutPage = () => {
       city: '',
       zipCode: '',
       country: '',
+      paymentMethod: 'cod',
     },
   });
 
@@ -46,7 +51,7 @@ const CheckoutPage = () => {
       return;
     }
 
-    setCustomerInfo(data as CustomerInfo);
+    setCustomerInfo({...data} as CustomerInfo);
     
     toast.promise(placeOrder(), {
       loading: 'Processing your order...',
@@ -204,6 +209,43 @@ const CheckoutPage = () => {
                   />
                 </div>
 
+                <div className="glass-card p-6 mt-4 rounded-lg">
+                  <h2 className="text-xl font-semibold text-white mb-4">Payment Method</h2>
+                  <FormField
+                    control={form.control}
+                    name="paymentMethod"
+                    render={({ field }) => (
+                      <FormItem className="space-y-3">
+                        <FormControl>
+                          <RadioGroup
+                            onValueChange={field.onChange}
+                            defaultValue={field.value}
+                            className="flex flex-col space-y-3"
+                          >
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="cod" id="cod" className="text-purple" />
+                              </FormControl>
+                              <FormLabel htmlFor="cod" className="font-normal text-white cursor-pointer">
+                                Cash on Delivery (COD)
+                              </FormLabel>
+                            </FormItem>
+                            <FormItem className="flex items-center space-x-3 space-y-0">
+                              <FormControl>
+                                <RadioGroupItem value="bank_transfer" id="bank_transfer" className="text-purple" />
+                              </FormControl>
+                              <FormLabel htmlFor="bank_transfer" className="font-normal text-white cursor-pointer">
+                                Bank Transfer
+                              </FormLabel>
+                            </FormItem>
+                          </RadioGroup>
+                        </FormControl>
+                        <FormMessage />
+                      </FormItem>
+                    )}
+                  />
+                </div>
+
                 <div className="lg:hidden">
                   <OrderSummary cartItems={cartItems} cartTotal={cartTotal} />
                   
@@ -247,7 +289,7 @@ const OrderSummary = ({ cartItems, cartTotal }: { cartItems: any[], cartTotal: n
       {cartItems.map(item => (
         <div key={item.product.id} className="flex justify-between text-gray-300 text-sm">
           <span>{item.quantity} × {item.product.name}</span>
-          <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+          <span>Rs {Math.round(item.product.price * item.quantity)}</span>
         </div>
       ))}
     </div>
@@ -257,7 +299,7 @@ const OrderSummary = ({ cartItems, cartTotal }: { cartItems: any[], cartTotal: n
     <div className="space-y-4 mb-2">
       <div className="flex justify-between text-gray-300">
         <span>Subtotal</span>
-        <span>${cartTotal.toFixed(2)}</span>
+        <span>Rs {Math.round(cartTotal)}</span>
       </div>
       <div className="flex justify-between text-gray-300">
         <span>Shipping</span>
@@ -266,7 +308,7 @@ const OrderSummary = ({ cartItems, cartTotal }: { cartItems: any[], cartTotal: n
       <Separator className="my-2 bg-white/10" />
       <div className="flex justify-between text-white font-semibold text-lg">
         <span>Total</span>
-        <span>${cartTotal.toFixed(2)}</span>
+        <span>Rs {Math.round(cartTotal)}</span>
       </div>
     </div>
   </>

@@ -22,6 +22,7 @@ export interface CustomerInfo {
   city: string;
   zipCode: string;
   country: string;
+  paymentMethod?: 'cod' | 'bank_transfer';
 }
 
 export interface Order {

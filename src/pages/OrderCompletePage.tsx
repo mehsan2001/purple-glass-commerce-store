@@ -57,6 +57,14 @@ const OrderCompletePage = () => {
                 {lastOrder.customerInfo.address}, {lastOrder.customerInfo.city}, {lastOrder.customerInfo.zipCode}, {lastOrder.customerInfo.country}
               </p>
             </div>
+            <div>
+              <p className="text-sm text-gray-400">Payment Method</p>
+              <p>
+                {lastOrder.customerInfo.paymentMethod === 'cod' 
+                  ? 'Cash on Delivery' 
+                  : 'Bank Transfer'}
+              </p>
+            </div>
           </div>
         </div>
 
@@ -67,7 +75,7 @@ const OrderCompletePage = () => {
             {lastOrder.items.map(item => (
               <div key={item.product.id} className="flex justify-between text-gray-300">
                 <span>{item.quantity} × {item.product.name}</span>
-                <span>${(item.product.price * item.quantity).toFixed(2)}</span>
+                <span>Rs {Math.round(item.product.price * item.quantity)}</span>
               </div>
             ))}
           </div>
@@ -76,7 +84,7 @@ const OrderCompletePage = () => {
           
           <div className="flex justify-between text-white font-semibold">
             <span>Total</span>
-            <span>${lastOrder.total.toFixed(2)}</span>
+            <span>Rs {Math.round(lastOrder.total)}</span>
           </div>
         </div>
 
