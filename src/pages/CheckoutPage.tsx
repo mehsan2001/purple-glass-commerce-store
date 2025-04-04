@@ -1,5 +1,5 @@
 
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
@@ -25,11 +25,14 @@ const formSchema = z.object({
   paymentMethod: z.enum(['cod', 'bank_transfer'], {
     required_error: 'Please select a payment method',
   }),
+  bankAccountName: z.string().optional(),
+  bankAccountNumber: z.string().optional(),
 });
 
 const CheckoutPage = () => {
   const { cartItems, cartTotal, setCustomerInfo, placeOrder } = useCart();
   const navigate = useNavigate();
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState<'cod' | 'bank_transfer'>('cod');
 
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -42,6 +45,8 @@ const CheckoutPage = () => {
       zipCode: '',
       country: '',
       paymentMethod: 'cod',
+      bankAccountName: '',
+      bankAccountNumber: '',
     },
   });
 
@@ -62,6 +67,15 @@ const CheckoutPage = () => {
       error: 'Failed to place order',
     });
   };
+
+  const watchPaymentMethod = form.watch('paymentMethod');
+
+  // Update local state when payment method changes
+  React.useEffect(() => {
+    if (watchPaymentMethod) {
+      setSelectedPaymentMethod(watchPaymentMethod);
+    }
+  }, [watchPaymentMethod]);
 
   if (cartItems.length === 0) {
     navigate('/cart');
@@ -244,6 +258,48 @@ const CheckoutPage = () => {
                       </FormItem>
                     )}
                   />
+
+                  {/* Bank transfer details section */}
+                  {selectedPaymentMethod === 'bank_transfer' && (
+                    <div className="mt-4 space-y-4 p-4 bg-white/5 rounded-lg">
+                      <FormField
+                        control={form.control}
+                        name="bankAccountName"
+                        rules={{ required: selectedPaymentMethod === 'bank_transfer' }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Account Holder Name</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Enter account holder name" 
+                                className="glass-input text-white" 
+                                {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                      <FormField
+                        control={form.control}
+                        name="bankAccountNumber"
+                        rules={{ required: selectedPaymentMethod === 'bank_transfer' }}
+                        render={({ field }) => (
+                          <FormItem>
+                            <FormLabel className="text-white">Account Number</FormLabel>
+                            <FormControl>
+                              <Input 
+                                placeholder="Enter account number" 
+                                className="glass-input text-white" 
+                              {...field} 
+                              />
+                            </FormControl>
+                            <FormMessage />
+                          </FormItem>
+                        )}
+                      />
+                    </div>
+                  )}
                 </div>
 
                 <div className="lg:hidden">

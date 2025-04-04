@@ -29,7 +29,7 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
         </Link>
         <p className="text-gray-300 line-clamp-2 mb-4">{product.description}</p>
         <div className="flex items-baseline justify-between">
-          <span className="text-xl font-bold text-white">${product.price.toFixed(2)}</span>
+          <span className="text-xl font-bold text-white">Rs {Math.round(product.price)}</span>
           <span className="text-sm text-gray-400">{product.category}</span>
         </div>
       </div>

@@ -23,6 +23,8 @@ export interface CustomerInfo {
   zipCode: string;
   country: string;
   paymentMethod?: 'cod' | 'bank_transfer';
+  bankAccountName?: string;
+  bankAccountNumber?: string;
 }
 
 export interface Order {

@@ -103,7 +103,8 @@ export const ordersApi = {
     
     if (itemsError) throw itemsError;
     
-    order.items = items.map(item => ({
+    // Fix the structure of the order items
+    const formattedItems = items.map(item => ({
       id: item.id,
       product: {
         id: item.product_id,
@@ -115,6 +116,8 @@ export const ordersApi = {
       quantity: item.quantity,
       price: item.price
     }));
+    
+    order.items = formattedItems;
     
     return order;
   },

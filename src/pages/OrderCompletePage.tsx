@@ -65,6 +65,14 @@ const OrderCompletePage = () => {
                   : 'Bank Transfer'}
               </p>
             </div>
+            {lastOrder.customerInfo.paymentMethod === 'bank_transfer' && lastOrder.customerInfo.bankAccountName && (
+              <div>
+                <p className="text-sm text-gray-400">Account Details</p>
+                <p>
+                  {lastOrder.customerInfo.bankAccountName} - {lastOrder.customerInfo.bankAccountNumber}
+                </p>
+              </div>
+            )}
           </div>
         </div>
 
