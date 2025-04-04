@@ -1,12 +1,16 @@
 
-const db = require('../config/database');
+const supabase = require('../config/supabase');
 
 class Product {
   // Get all products
   static async findAll() {
     try {
-      const [rows] = await db.query('SELECT * FROM products');
-      return rows;
+      const { data, error } = await supabase
+        .from('products')
+        .select('*');
+
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Error fetching products:', error);
       throw error;
@@ -16,8 +20,14 @@ class Product {
   // Get a product by ID
   static async findById(id) {
     try {
-      const [rows] = await db.query('SELECT * FROM products WHERE id = ?', [id]);
-      return rows[0];
+      const { data, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', id)
+        .single();
+
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error(`Error fetching product with ID ${id}:`, error);
       throw error;
@@ -28,11 +38,22 @@ class Product {
   static async create(productData) {
     try {
       const { name, price, description, features, image, category } = productData;
-      const [result] = await db.query(
-        'INSERT INTO products (name, price, description, features, image, category) VALUES (?, ?, ?, ?, ?, ?)',
-        [name, price, description, JSON.stringify(features), image, category]
-      );
-      return result.insertId;
+      const { data, error } = await supabase
+        .from('products')
+        .insert([
+          { 
+            name, 
+            price, 
+            description, 
+            features: Array.isArray(features) ? features : JSON.parse(features), 
+            image, 
+            category 
+          }
+        ])
+        .select();
+
+      if (error) throw error;
+      return data[0].id;
     } catch (error) {
       console.error('Error creating product:', error);
       throw error;
@@ -43,11 +64,20 @@ class Product {
   static async update(id, productData) {
     try {
       const { name, price, description, features, image, category } = productData;
-      const [result] = await db.query(
-        'UPDATE products SET name = ?, price = ?, description = ?, features = ?, image = ?, category = ? WHERE id = ?',
-        [name, price, description, JSON.stringify(features), image, category, id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('products')
+        .update({ 
+          name, 
+          price, 
+          description, 
+          features: Array.isArray(features) ? features : JSON.parse(features), 
+          image, 
+          category 
+        })
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
     } catch (error) {
       console.error(`Error updating product with ID ${id}:`, error);
       throw error;
@@ -57,8 +87,13 @@ class Product {
   // Delete a product
   static async delete(id) {
     try {
-      const [result] = await db.query('DELETE FROM products WHERE id = ?', [id]);
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('products')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
     } catch (error) {
       console.error(`Error deleting product with ID ${id}:`, error);
       throw error;

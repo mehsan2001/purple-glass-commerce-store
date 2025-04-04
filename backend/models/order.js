@@ -1,5 +1,5 @@
 
-const db = require('../config/database');
+const supabase = require('../config/supabase');
 
 class Order {
   // Create a new order
@@ -12,31 +12,39 @@ class Order {
         status = 'pending' 
       } = orderData;
 
-      // Start a transaction
-      await db.query('START TRANSACTION');
-
       // Insert order
-      const [orderResult] = await db.query(
-        'INSERT INTO orders (customer_info, total, status, order_date) VALUES (?, ?, ?, NOW())',
-        [JSON.stringify(customer_info), total, status]
-      );
-      const orderId = orderResult.insertId;
+      const { data: orderData, error: orderError } = await supabase
+        .from('orders')
+        .insert([
+          { 
+            customer_info, 
+            total, 
+            status, 
+            order_date: new Date().toISOString() 
+          }
+        ])
+        .select();
+
+      if (orderError) throw orderError;
+      
+      const orderId = orderData[0].id;
 
       // Insert order items
-      for (const item of items) {
-        await db.query(
-          'INSERT INTO order_items (order_id, product_id, quantity, price) VALUES (?, ?, ?, ?)',
-          [orderId, item.product.id, item.quantity, item.product.price]
-        );
-      }
+      const orderItems = items.map(item => ({
+        order_id: orderId,
+        product_id: item.product.id,
+        quantity: item.quantity,
+        price: item.product.price
+      }));
 
-      // Commit the transaction
-      await db.query('COMMIT');
+      const { error: itemsError } = await supabase
+        .from('order_items')
+        .insert(orderItems);
+
+      if (itemsError) throw itemsError;
 
       return orderId;
     } catch (error) {
-      // Rollback the transaction in case of error
-      await db.query('ROLLBACK');
       console.error('Error creating order:', error);
       throw error;
     }
@@ -46,32 +54,44 @@ class Order {
   static async findById(id) {
     try {
       // Get the order
-      const [orders] = await db.query('SELECT * FROM orders WHERE id = ?', [id]);
-      if (orders.length === 0) return null;
-      
-      const order = orders[0];
+      const { data: order, error: orderError } = await supabase
+        .from('orders')
+        .select('*')
+        .eq('id', id)
+        .single();
 
-      // Get the order items
-      const [items] = await db.query(
-        `SELECT oi.*, p.name, p.image, p.category 
-         FROM order_items oi 
-         JOIN products p ON oi.product_id = p.id 
-         WHERE oi.order_id = ?`,
-        [id]
-      );
-
-      // Parse the customer_info JSON
-      order.customer_info = JSON.parse(order.customer_info);
+      if (orderError) throw orderError;
+      if (!order) return null;
       
-      // Add the items to the order
-      order.items = items.map(item => ({
+      // Get the order items with product details
+      const { data: orderItems, error: itemsError } = await supabase
+        .from('order_items')
+        .select(`
+          id,
+          product_id,
+          quantity,
+          price,
+          products (
+            id,
+            name,
+            price,
+            image,
+            category
+          )
+        `)
+        .eq('order_id', id);
+
+      if (itemsError) throw itemsError;
+      
+      // Format the items to match the expected structure
+      order.items = orderItems.map(item => ({
         id: item.id,
         product: {
           id: item.product_id,
-          name: item.name,
+          name: item.products.name,
           price: item.price,
-          image: item.image,
-          category: item.category
+          image: item.products.image,
+          category: item.products.category
         },
         quantity: item.quantity,
         price: item.price
@@ -87,8 +107,13 @@ class Order {
   // Get all orders
   static async findAll() {
     try {
-      const [rows] = await db.query('SELECT * FROM orders ORDER BY order_date DESC');
-      return rows;
+      const { data, error } = await supabase
+        .from('orders')
+        .select('*')
+        .order('order_date', { ascending: false });
+
+      if (error) throw error;
+      return data;
     } catch (error) {
       console.error('Error fetching orders:', error);
       throw error;
@@ -98,11 +123,13 @@ class Order {
   // Update order status
   static async updateStatus(id, status) {
     try {
-      const [result] = await db.query(
-        'UPDATE orders SET status = ? WHERE id = ?',
-        [status, id]
-      );
-      return result.affectedRows > 0;
+      const { error } = await supabase
+        .from('orders')
+        .update({ status })
+        .eq('id', id);
+
+      if (error) throw error;
+      return true;
     } catch (error) {
       console.error(`Error updating status for order with ID ${id}:`, error);
       throw error;

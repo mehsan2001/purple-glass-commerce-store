@@ -1,40 +1,123 @@
 
-import axios from 'axios';
+import { createClient } from '@supabase/supabase-js';
+import { Product, CartItem, CustomerInfo } from '../types';
 
-// Create axios instance with base URL
-const API_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001/api';
+// Create Supabase client
+const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
+const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
 
-const api = axios.create({
-  baseURL: API_URL,
-  headers: {
-    'Content-Type': 'application/json',
-  },
-});
+if (!supabaseUrl || !supabaseAnonKey) {
+  console.error('Missing Supabase environment variables');
+}
+
+export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 
 // Products API
 export const productsApi = {
-  getAllProducts: async () => {
-    const response = await api.get('/products');
-    return response.data;
+  getAllProducts: async (): Promise<Product[]> => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*');
+    
+    if (error) throw error;
+    return data;
   },
   
-  getProductById: async (id: number) => {
-    const response = await api.get(`/products/${id}`);
-    return response.data;
+  getProductById: async (id: number): Promise<Product> => {
+    const { data, error } = await supabase
+      .from('products')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    return data;
   },
 };
 
 // Orders API
 export const ordersApi = {
-  createOrder: async (orderData: any) => {
-    const response = await api.post('/orders', orderData);
-    return response.data;
+  createOrder: async (orderData: {
+    customer_info: CustomerInfo,
+    items: CartItem[],
+    total: number
+  }) => {
+    const { data, error } = await supabase
+      .from('orders')
+      .insert([
+        {
+          customer_info: orderData.customer_info,
+          total: orderData.total,
+          status: 'pending',
+          order_date: new Date().toISOString()
+        }
+      ])
+      .select();
+    
+    if (error) throw error;
+    
+    const orderId = data[0].id;
+    
+    // Insert order items
+    const orderItems = orderData.items.map(item => ({
+      order_id: orderId,
+      product_id: item.product.id,
+      quantity: item.quantity,
+      price: item.product.price
+    }));
+    
+    const { error: itemsError } = await supabase
+      .from('order_items')
+      .insert(orderItems);
+    
+    if (itemsError) throw itemsError;
+    
+    return data[0];
   },
   
   getOrderById: async (id: number) => {
-    const response = await api.get(`/orders/${id}`);
-    return response.data;
+    const { data: order, error } = await supabase
+      .from('orders')
+      .select('*')
+      .eq('id', id)
+      .single();
+    
+    if (error) throw error;
+    
+    const { data: items, error: itemsError } = await supabase
+      .from('order_items')
+      .select(`
+        id,
+        product_id,
+        quantity,
+        price,
+        products (
+          id,
+          name,
+          price,
+          image,
+          category
+        )
+      `)
+      .eq('order_id', id);
+    
+    if (itemsError) throw itemsError;
+    
+    order.items = items.map(item => ({
+      id: item.id,
+      product: {
+        id: item.product_id,
+        name: item.products.name,
+        price: item.price,
+        image: item.products.image,
+        category: item.products.category
+      },
+      quantity: item.quantity,
+      price: item.price
+    }));
+    
+    return order;
   },
 };
 
-export default api;
+export default supabase;

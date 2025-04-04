@@ -4,13 +4,9 @@ const express = require('express');
 const cors = require('cors');
 const apiRoutes = require('./routes/api');
 const { errorHandler, notFoundHandler } = require('./middleware/error.middleware');
-const { testConnection } = require('./config/db');
 
 const app = express();
 const PORT = process.env.PORT || 3001;
-
-// Test database connection
-testConnection();
 
 // Middleware
 app.use(cors());
