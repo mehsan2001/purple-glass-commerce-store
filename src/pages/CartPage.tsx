@@ -50,7 +50,7 @@ const CartPage = () => {
           <div className="space-y-4 mb-6">
             <div className="flex justify-between text-gray-300">
               <span>Subtotal ({cartItems.reduce((sum, item) => sum + item.quantity, 0)} items)</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>Rs {Math.round(cartTotal)}</span>
             </div>
             <div className="flex justify-between text-gray-300">
               <span>Shipping</span>
@@ -59,7 +59,7 @@ const CartPage = () => {
             <Separator className="my-2 bg-white/10" />
             <div className="flex justify-between text-white font-semibold text-lg">
               <span>Total</span>
-              <span>${cartTotal.toFixed(2)}</span>
+              <span>Rs {Math.round(cartTotal)}</span>
             </div>
           </div>
           

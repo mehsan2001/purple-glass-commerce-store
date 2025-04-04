@@ -108,10 +108,10 @@ export const ordersApi = {
       id: item.id,
       product: {
         id: item.product_id,
-        name: item.purpleglass_products.name,
+        name: item.purpleglass_products?.name,
         price: item.price,
-        image: item.purpleglass_products.image,
-        category: item.purpleglass_products.category
+        image: item.purpleglass_products?.image,
+        category: item.purpleglass_products?.category
       },
       quantity: item.quantity,
       price: item.price

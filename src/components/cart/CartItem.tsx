@@ -25,7 +25,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
         </div>
         <div className="ml-4">
           <h3 className="font-semibold text-white">{product.name}</h3>
-          <p className="text-gray-300">${product.price.toFixed(2)}</p>
+          <p className="text-gray-300">Rs {Math.round(product.price)}</p>
         </div>
       </div>
 
@@ -50,7 +50,7 @@ const CartItem: React.FC<CartItemProps> = ({ item }) => {
           </Button>
         </div>
         <div className="text-right sm:min-w-[100px]">
-          <p className="font-semibold text-white">${(product.price * quantity).toFixed(2)}</p>
+          <p className="font-semibold text-white">Rs {Math.round(product.price * quantity)}</p>
         </div>
         <Button 
           variant="ghost" 
