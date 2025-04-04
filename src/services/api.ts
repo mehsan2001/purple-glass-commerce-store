@@ -16,7 +16,7 @@ export const supabase = createClient(supabaseUrl, supabaseAnonKey);
 export const productsApi = {
   getAllProducts: async (): Promise<Product[]> => {
     const { data, error } = await supabase
-      .from('products')
+      .from('purpleglass_products')
       .select('*');
     
     if (error) throw error;
@@ -25,7 +25,7 @@ export const productsApi = {
   
   getProductById: async (id: number): Promise<Product> => {
     const { data, error } = await supabase
-      .from('products')
+      .from('purpleglass_products')
       .select('*')
       .eq('id', id)
       .single();
@@ -43,7 +43,7 @@ export const ordersApi = {
     total: number
   }) => {
     const { data, error } = await supabase
-      .from('orders')
+      .from('purpleglass_orders')
       .insert([
         {
           customer_info: orderData.customer_info,
@@ -67,7 +67,7 @@ export const ordersApi = {
     }));
     
     const { error: itemsError } = await supabase
-      .from('order_items')
+      .from('purpleglass_order_items')
       .insert(orderItems);
     
     if (itemsError) throw itemsError;
@@ -77,7 +77,7 @@ export const ordersApi = {
   
   getOrderById: async (id: number) => {
     const { data: order, error } = await supabase
-      .from('orders')
+      .from('purpleglass_orders')
       .select('*')
       .eq('id', id)
       .single();
@@ -85,13 +85,13 @@ export const ordersApi = {
     if (error) throw error;
     
     const { data: items, error: itemsError } = await supabase
-      .from('order_items')
+      .from('purpleglass_order_items')
       .select(`
         id,
         product_id,
         quantity,
         price,
-        products (
+        purpleglass_products (
           id,
           name,
           price,
@@ -107,10 +107,10 @@ export const ordersApi = {
       id: item.id,
       product: {
         id: item.product_id,
-        name: item.products.name,
+        name: item.purpleglass_products.name,
         price: item.price,
-        image: item.products.image,
-        category: item.products.category
+        image: item.purpleglass_products.image,
+        category: item.purpleglass_products.category
       },
       quantity: item.quantity,
       price: item.price

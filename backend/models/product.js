@@ -6,7 +6,7 @@ class Product {
   static async findAll() {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('purpleglass_products')
         .select('*');
 
       if (error) throw error;
@@ -21,7 +21,7 @@ class Product {
   static async findById(id) {
     try {
       const { data, error } = await supabase
-        .from('products')
+        .from('purpleglass_products')
         .select('*')
         .eq('id', id)
         .single();
@@ -39,7 +39,7 @@ class Product {
     try {
       const { name, price, description, features, image, category } = productData;
       const { data, error } = await supabase
-        .from('products')
+        .from('purpleglass_products')
         .insert([
           { 
             name, 
@@ -65,7 +65,7 @@ class Product {
     try {
       const { name, price, description, features, image, category } = productData;
       const { error } = await supabase
-        .from('products')
+        .from('purpleglass_products')
         .update({ 
           name, 
           price, 
@@ -88,7 +88,7 @@ class Product {
   static async delete(id) {
     try {
       const { error } = await supabase
-        .from('products')
+        .from('purpleglass_products')
         .delete()
         .eq('id', id);
 

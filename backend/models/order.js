@@ -14,7 +14,7 @@ class Order {
 
       // Insert order
       const { data: orderData, error: orderError } = await supabase
-        .from('orders')
+        .from('purpleglass_orders')
         .insert([
           { 
             customer_info, 
@@ -38,7 +38,7 @@ class Order {
       }));
 
       const { error: itemsError } = await supabase
-        .from('order_items')
+        .from('purpleglass_order_items')
         .insert(orderItems);
 
       if (itemsError) throw itemsError;
@@ -55,7 +55,7 @@ class Order {
     try {
       // Get the order
       const { data: order, error: orderError } = await supabase
-        .from('orders')
+        .from('purpleglass_orders')
         .select('*')
         .eq('id', id)
         .single();
@@ -65,13 +65,13 @@ class Order {
       
       // Get the order items with product details
       const { data: orderItems, error: itemsError } = await supabase
-        .from('order_items')
+        .from('purpleglass_order_items')
         .select(`
           id,
           product_id,
           quantity,
           price,
-          products (
+          purpleglass_products (
             id,
             name,
             price,
@@ -88,10 +88,10 @@ class Order {
         id: item.id,
         product: {
           id: item.product_id,
-          name: item.products.name,
+          name: item.purpleglass_products.name,
           price: item.price,
-          image: item.products.image,
-          category: item.products.category
+          image: item.purpleglass_products.image,
+          category: item.purpleglass_products.category
         },
         quantity: item.quantity,
         price: item.price
@@ -108,7 +108,7 @@ class Order {
   static async findAll() {
     try {
       const { data, error } = await supabase
-        .from('orders')
+        .from('purpleglass_orders')
         .select('*')
         .order('order_date', { ascending: false });
 
@@ -124,7 +124,7 @@ class Order {
   static async updateStatus(id, status) {
     try {
       const { error } = await supabase
-        .from('orders')
+        .from('purpleglass_orders')
         .update({ status })
         .eq('id', id);
 
