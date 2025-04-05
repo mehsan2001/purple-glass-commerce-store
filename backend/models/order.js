@@ -5,6 +5,8 @@ class Order {
   // Create a new order
   static async create(orderData) {
     try {
+      console.log("Backend: Creating order with data:", orderData);
+      
       const { 
         customer_info, 
         items, 
@@ -13,7 +15,7 @@ class Order {
       } = orderData;
 
       // Insert order
-      const { data: orderData, error: orderError } = await supabase
+      const { data: orderResult, error: orderError } = await supabase
         .from('purpleglass_orders')
         .insert([
           { 
@@ -25,9 +27,18 @@ class Order {
         ])
         .select();
 
-      if (orderError) throw orderError;
+      if (orderError) {
+        console.error("Backend: Error creating order:", orderError);
+        throw orderError;
+      }
       
-      const orderId = orderData[0].id;
+      if (!orderResult || orderResult.length === 0) {
+        console.error("Backend: No order data returned after insert");
+        throw new Error("Failed to create order");
+      }
+      
+      const orderId = orderResult[0].id;
+      console.log("Backend: Order created with ID:", orderId);
 
       // Insert order items
       const orderItems = items.map(item => ({
@@ -37,15 +48,20 @@ class Order {
         price: item.product.price
       }));
 
+      console.log("Backend: Inserting order items:", orderItems);
+      
       const { error: itemsError } = await supabase
         .from('purpleglass_order_items')
         .insert(orderItems);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error("Backend: Error inserting order items:", itemsError);
+        throw itemsError;
+      }
 
       return orderId;
     } catch (error) {
-      console.error('Error creating order:', error);
+      console.error('Backend: Error creating order:', error);
       throw error;
     }
   }
@@ -53,6 +69,8 @@ class Order {
   // Get an order by ID
   static async findById(id) {
     try {
+      console.log(`Backend: Fetching order with ID ${id}`);
+      
       // Get the order
       const { data: order, error: orderError } = await supabase
         .from('purpleglass_orders')
@@ -60,8 +78,15 @@ class Order {
         .eq('id', id)
         .single();
 
-      if (orderError) throw orderError;
-      if (!order) return null;
+      if (orderError) {
+        console.error(`Backend: Error fetching order with ID ${id}:`, orderError);
+        throw orderError;
+      }
+      
+      if (!order) {
+        console.log(`Backend: No order found with ID ${id}`);
+        return null;
+      }
       
       // Get the order items with product details
       const { data: orderItems, error: itemsError } = await supabase
@@ -81,7 +106,10 @@ class Order {
         `)
         .eq('order_id', id);
 
-      if (itemsError) throw itemsError;
+      if (itemsError) {
+        console.error(`Backend: Error fetching order items for order ${id}:`, itemsError);
+        throw itemsError;
+      }
       
       // Format the items to match the expected structure
       order.items = orderItems.map(item => ({
@@ -107,15 +135,22 @@ class Order {
   // Get all orders
   static async findAll() {
     try {
+      console.log("Backend: Fetching all orders");
+      
       const { data, error } = await supabase
         .from('purpleglass_orders')
         .select('*')
         .order('order_date', { ascending: false });
 
-      if (error) throw error;
+      if (error) {
+        console.error("Backend: Error fetching orders:", error);
+        throw error;
+      }
+      
+      console.log(`Backend: Found ${data.length} orders`);
       return data;
     } catch (error) {
-      console.error('Error fetching orders:', error);
+      console.error('Backend: Error fetching orders:', error);
       throw error;
     }
   }
@@ -123,15 +158,22 @@ class Order {
   // Update order status
   static async updateStatus(id, status) {
     try {
+      console.log(`Backend: Updating status for order ${id} to ${status}`);
+      
       const { error } = await supabase
         .from('purpleglass_orders')
         .update({ status })
         .eq('id', id);
 
-      if (error) throw error;
+      if (error) {
+        console.error(`Backend: Error updating status for order ${id}:`, error);
+        throw error;
+      }
+      
+      console.log(`Backend: Successfully updated status for order ${id}`);
       return true;
     } catch (error) {
-      console.error(`Error updating status for order with ID ${id}:`, error);
+      console.error(`Backend: Error updating status for order with ID ${id}:`, error);
       throw error;
     }
   }
