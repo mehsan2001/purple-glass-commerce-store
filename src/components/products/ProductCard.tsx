@@ -15,10 +15,10 @@ const ProductCard: React.FC<ProductCardProps> = ({ product }) => {
   const { addToCart } = useCart();
 
   return (
-    <Card className="glass-card overflow-hidden flex flex-col h-full transition duration-300 hover:shadow-xl hover:shadow-purple-light/10">
+    <Card className="glass-card overflow-hidden flex flex-col h-full transition duration-300 hover:shadow-xl hover:shadow-purple-light/10 border-2 border-white/10">
       <div className="p-4 flex-grow">
         <Link to={`/product/${product.id}`}>
-          <div className="relative aspect-square mb-4 overflow-hidden rounded-md">
+          <div className="relative aspect-square mb-4 overflow-hidden rounded-md border border-white/5">
             <img 
               src={product.image} 
               alt={product.name} 
