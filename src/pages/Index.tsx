@@ -1,25 +1,15 @@
-
 import React from 'react';
 import { Link } from 'react-router-dom';
 import Layout from '@/components/layout/Layout';
 import ProductGrid from '@/components/products/ProductGrid';
 import { Button } from '@/components/ui/button';
 import { products } from '@/data/products';
-import { 
-  Carousel,
-  CarouselContent, 
-  CarouselItem, 
-  CarouselPrevious, 
-  CarouselNext 
-} from '@/components/ui/carousel';
+import { Carousel, CarouselContent, CarouselItem, CarouselPrevious, CarouselNext } from '@/components/ui/carousel';
 import ProductCard from '@/components/products/ProductCard';
-
 const Index = () => {
   // Show 6 products on the homepage instead of 4
   const featuredProducts = products.slice(0, 6);
-
-  return (
-    <Layout>
+  return <Layout>
       {/* Hero Section */}
       <section className="glass rounded-xl p-8 mb-16">
         <div className="container mx-auto">
@@ -44,11 +34,7 @@ const Index = () => {
               <div className="relative">
                 <div className="absolute -inset-0.5 bg-gradient-to-r from-purple to-orange/50 rounded-lg blur-xl opacity-75"></div>
                 <div className="relative rounded-lg overflow-hidden">
-                  <img 
-                    src="/products/headphones.png" 
-                    alt="Featured Product" 
-                    className="w-full h-auto rounded-lg"
-                  />
+                  <img alt="Featured Product" className="w-full h-auto rounded-lg" src="/lovable-uploads/566fc242-5ed3-49be-ac1d-8146703e3760.png" />
                 </div>
               </div>
             </div>
@@ -68,11 +54,9 @@ const Index = () => {
           
           <Carousel className="w-full">
             <CarouselContent className="-ml-2 md:-ml-4">
-              {featuredProducts.map((product) => (
-                <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
+              {featuredProducts.map(product => <CarouselItem key={product.id} className="pl-2 md:pl-4 md:basis-1/2 lg:basis-1/3 xl:basis-1/4">
                   <ProductCard product={product} />
-                </CarouselItem>
-              ))}
+                </CarouselItem>)}
             </CarouselContent>
             <div className="flex justify-center mt-6 gap-2">
               <CarouselPrevious className="relative static left-0 right-auto translate-y-0 bg-purple-light/20 hover:bg-purple-light/30 border-white/10" />
@@ -177,8 +161,6 @@ const Index = () => {
           <Link to="/products">Shop Now</Link>
         </Button>
       </section>
-    </Layout>
-  );
+    </Layout>;
 };
-
 export default Index;
