@@ -65,7 +65,7 @@ const CartPage = () => {
           
           <Button 
             onClick={handleCheckout} 
-            className="w-full bg-orange hover:bg-orange-dark text-white" 
+            className="w-full bg-orange hover:bg-orange-dark text-white btn-shake" 
             size="lg"
           >
             Proceed to Checkout

@@ -14,7 +14,13 @@ export const productsApi = {
       .select('*');
     
     if (error) throw error;
-    return data;
+    
+    // Convert features to string[] if needed
+    return data.map(product => ({
+      ...product,
+      features: Array.isArray(product.features) ? product.features : 
+                (typeof product.features === 'string' ? JSON.parse(product.features) : [])
+    }));
   },
   
   getProductById: async (id: number): Promise<Product> => {
@@ -25,7 +31,13 @@ export const productsApi = {
       .single();
     
     if (error) throw error;
-    return data;
+    
+    // Convert features to string[] if needed
+    return {
+      ...data,
+      features: Array.isArray(data.features) ? data.features : 
+               (typeof data.features === 'string' ? JSON.parse(data.features) : [])
+    };
   },
 };
 
@@ -43,14 +55,12 @@ export const ordersApi = {
       // Insert the order first
       const { data: orderResult, error: orderError } = await supabase
         .from('purpleglass_orders')
-        .insert([
-          {
-            customer_info: orderData.customer_info,
-            total: orderData.total,
-            status: 'pending',
-            order_date: new Date().toISOString()
-          }
-        ])
+        .insert({
+          customer_info: orderData.customer_info as any,  // Type assertion to avoid TypeScript errors
+          total: orderData.total,
+          status: 'pending',
+          order_date: new Date().toISOString()
+        })
         .select();
     
       if (orderError) {
@@ -145,9 +155,13 @@ export const ordersApi = {
         price: item.price
       }));
       
-      order.items = formattedItems;
+      // Create a new object with the items property instead of modifying directly
+      const fullOrder = {
+        ...order,
+        items: formattedItems
+      };
       
-      return order;
+      return fullOrder;
     } catch (error) {
       console.error("Error in getOrderById function:", error);
       throw error;

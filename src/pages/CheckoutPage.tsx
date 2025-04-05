@@ -307,7 +307,7 @@ const CheckoutPage = () => {
                   
                   <Button 
                     type="submit" 
-                    className="w-full mt-6 bg-orange hover:bg-orange-dark text-white" 
+                    className="w-full mt-6 bg-orange hover:bg-orange-dark text-white btn-shake" 
                     size="lg"
                   >
                     Complete Order
@@ -324,7 +324,7 @@ const CheckoutPage = () => {
             
             <Button 
               onClick={form.handleSubmit(handleSubmit)} 
-              className="w-full mt-6 bg-orange hover:bg-orange-dark text-white" 
+              className="w-full mt-6 bg-orange hover:bg-orange-dark text-white btn-shake" 
               size="lg"
             >
               Complete Order
