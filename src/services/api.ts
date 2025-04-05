@@ -1,16 +1,10 @@
 
 import { createClient } from '@supabase/supabase-js';
 import { Product, CartItem, CustomerInfo } from '../types';
+import { supabase as supabaseClient } from '@/integrations/supabase/client';
 
-// Create Supabase client
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
-
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Missing Supabase environment variables');
-}
-
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Use the Supabase client from the integrations folder which has the correct configuration
+export const supabase = supabaseClient;
 
 // Products API
 export const productsApi = {
@@ -137,7 +131,7 @@ export const ordersApi = {
         throw itemsError;
       }
       
-      // Fix the structure of the order items - the bug was here
+      // Fix the structure of the order items - fixing the TypeScript errors here
       const formattedItems = items.map(item => ({
         id: item.id,
         product: {
