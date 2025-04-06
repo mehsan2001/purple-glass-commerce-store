@@ -120,6 +120,7 @@ export const ordersApi = {
         throw error;
       }
       
+      // When selecting from order_items, include the product_name field
       const { data: items, error: itemsError } = await supabase
         .from('purpleglass_order_items')
         .select(`
@@ -143,18 +144,24 @@ export const ordersApi = {
         throw itemsError;
       }
       
+      if (!items) {
+        console.error("No items returned for order:", id);
+        throw new Error("No items found for order");
+      }
+      
       // Fix the structure of the order items - fixing the TypeScript errors here
+      // Using optional chaining and type checking to prevent TypeScript errors
       const formattedItems = items.map(item => ({
-        id: item.id,
+        id: item?.id,
         product: {
-          id: item.product_id,
-          name: item.product_name, // Use the stored product name instead of relying on join
-          price: item.price,
-          image: item.purpleglass_products?.image,
-          category: item.purpleglass_products?.category
+          id: item?.product_id,
+          name: item?.product_name || "Unknown Product", // Use the stored product name
+          price: item?.price || 0,
+          image: item?.purpleglass_products?.image || "",
+          category: item?.purpleglass_products?.category || ""
         },
-        quantity: item.quantity,
-        price: item.price
+        quantity: item?.quantity || 0,
+        price: item?.price || 0
       }));
       
       // Create a new object with the items property instead of modifying directly
