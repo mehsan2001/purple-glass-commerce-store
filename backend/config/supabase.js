@@ -25,14 +25,22 @@ const supabase = createClient(supabaseUrl, supabaseKey);
     if (error) {
       console.error("Error connecting to Supabase:", error);
       
-      // Try to detect what tables are available
-      console.log("Checking available tables...");
+      // Check if purpleglass_orders table exists
+      console.log("Checking if orders table exists...");
       
       try {
-        const { data: tables } = await supabase.rpc('list_tables');
-        console.log("Available tables:", tables);
+        const { data: ordersData, error: ordersError } = await supabase
+          .from('purpleglass_orders')
+          .select('count');
+          
+        if (ordersError) {
+          console.error("Error accessing orders table:", ordersError);
+          console.error("Please check that the purpleglass_orders table exists in your Supabase project");
+        } else {
+          console.log("Successfully connected to orders table. Count:", ordersData);
+        }
       } catch (err) {
-        console.error("Could not list tables:", err);
+        console.error("Could not check orders table:", err);
       }
     } else {
       console.log("Successfully connected to Supabase. Products count:", data);

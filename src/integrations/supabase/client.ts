@@ -17,18 +17,14 @@ export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABL
 (async () => {
   try {
     // Use a more generic query that doesn't rely on specific table existence
-    const { data, error } = await supabase.from('purpleglass_products').select('*').maybeSingle();
+    const { data, error } = await supabase
+      .from('purpleglass_products')
+      .select('*')
+      .limit(1);
     
     if (error) {
       console.error("Error connecting to Supabase:", error);
-      
-      // Let's try to check what tables are available
-      const { data: tables, error: tablesError } = await supabase.rpc('list_tables');
-      if (!tablesError) {
-        console.log("Available tables:", tables);
-      } else {
-        console.error("Could not list tables:", tablesError);
-      }
+      console.log("Please check that the Supabase project is accessible and tables are created.");
     } else {
       console.log("Successfully connected to Supabase. Product sample:", data);
     }

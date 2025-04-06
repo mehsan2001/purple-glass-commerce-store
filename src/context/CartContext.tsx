@@ -1,4 +1,3 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import { toast } from 'sonner';
 import { CartItem, Product, CustomerInfo, Order } from '../types';
@@ -25,7 +24,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [lastOrder, setLastOrder] = useState<Order | null>(null);
   const [cartTotal, setCartTotal] = useState<number>(0);
 
-  // Load cart from localStorage on initial load
   useEffect(() => {
     const savedCart = localStorage.getItem('cart');
     if (savedCart) {
@@ -37,7 +35,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     }
   }, []);
 
-  // Calculate cart total whenever cartItems changes
   useEffect(() => {
     const total = cartItems.reduce(
       (sum, item) => sum + item.product.price * item.quantity,
@@ -45,7 +42,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
     );
     setCartTotal(total);
     
-    // Save cart to localStorage
     localStorage.setItem('cart', JSON.stringify(cartItems));
   }, [cartItems]);
 
@@ -54,14 +50,12 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const existingItem = prevItems.find(item => item.product.id === product.id);
       
       if (existingItem) {
-        // Update quantity if item already exists
         return prevItems.map(item => 
           item.product.id === product.id 
             ? { ...item, quantity: item.quantity + quantity } 
             : item
         );
       } else {
-        // Add new item
         return [...prevItems, { product, quantity }];
       }
     });
@@ -106,7 +100,6 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       console.log("Placing order with customer info:", customerInfo);
       console.log("Cart items:", cartItems);
       
-      // Save the order to Supabase
       const orderData = {
         customer_info: customerInfo,
         items: cartItems,
@@ -116,13 +109,14 @@ export const CartProvider: React.FC<{ children: React.ReactNode }> = ({ children
       const result = await ordersApi.createOrder(orderData);
       console.log("Order created in Supabase:", result);
       
-      // Format order object for our state
+      const orderIdString = result && result.id ? result.id.toString() : generateOrderId();
+      
       const order: Order = {
         items: [...cartItems],
         customerInfo: { ...customerInfo },
         total: cartTotal,
         date: new Date(),
-        orderId: result.id.toString()
+        orderId: orderIdString
       };
 
       setLastOrder(order);
