@@ -19,9 +19,21 @@ const supabase = createClient(supabaseUrl, supabaseKey);
 // Add a quick test to verify connectivity
 (async () => {
   try {
+    // Test connection by trying to access the products table
     const { data, error } = await supabase.from('purpleglass_products').select('count');
+    
     if (error) {
       console.error("Error connecting to Supabase:", error);
+      
+      // Try to detect what tables are available
+      console.log("Checking available tables...");
+      
+      try {
+        const { data: tables } = await supabase.rpc('list_tables');
+        console.log("Available tables:", tables);
+      } catch (err) {
+        console.error("Could not list tables:", err);
+      }
     } else {
       console.log("Successfully connected to Supabase. Products count:", data);
     }
