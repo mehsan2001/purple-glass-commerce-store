@@ -9,4 +9,20 @@ const SUPABASE_PUBLISHABLE_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiO
 // Import the supabase client like this:
 // import { supabase } from "@/integrations/supabase/client";
 
+// Create the client and log the connection to help with debugging
+console.log("Initializing Supabase client with URL:", SUPABASE_URL);
 export const supabase = createClient<Database>(SUPABASE_URL, SUPABASE_PUBLISHABLE_KEY);
+
+// Add a quick test to verify connectivity
+(async () => {
+  try {
+    const { data, error } = await supabase.from('purpleglass_products').select('count');
+    if (error) {
+      console.error("Error connecting to Supabase:", error);
+    } else {
+      console.log("Successfully connected to Supabase. Products count:", data);
+    }
+  } catch (e) {
+    console.error("Failed to test Supabase connection:", e);
+  }
+})();

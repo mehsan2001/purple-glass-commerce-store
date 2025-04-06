@@ -16,4 +16,18 @@ if (!supabaseUrl || !supabaseKey) {
 console.log('Initializing Supabase client with URL:', supabaseUrl);
 const supabase = createClient(supabaseUrl, supabaseKey);
 
+// Add a quick test to verify connectivity
+(async () => {
+  try {
+    const { data, error } = await supabase.from('purpleglass_products').select('count');
+    if (error) {
+      console.error("Error connecting to Supabase:", error);
+    } else {
+      console.log("Successfully connected to Supabase. Products count:", data);
+    }
+  } catch (e) {
+    console.error("Failed to test Supabase connection:", e);
+  }
+})();
+
 module.exports = supabase;

@@ -9,35 +9,55 @@ export const supabase = supabaseClient;
 // Products API
 export const productsApi = {
   getAllProducts: async (): Promise<Product[]> => {
-    const { data, error } = await supabase
-      .from('purpleglass_products')
-      .select('*');
-    
-    if (error) throw error;
-    
-    // Convert features to string[] if needed
-    return data.map(product => ({
-      ...product,
-      features: Array.isArray(product.features) ? product.features : 
-                (typeof product.features === 'string' ? JSON.parse(product.features) : [])
-    }));
+    try {
+      const { data, error } = await supabase
+        .from('purpleglass_products')
+        .select('*');
+      
+      if (error) {
+        console.error("Error fetching products:", error);
+        throw error;
+      }
+      
+      if (!data) {
+        return [];
+      }
+      
+      // Convert features to string[] if needed
+      return data.map(product => ({
+        ...product,
+        features: Array.isArray(product.features) ? product.features : 
+                  (typeof product.features === 'string' ? JSON.parse(product.features) : [])
+      }));
+    } catch (error) {
+      console.error("Error in getAllProducts:", error);
+      throw error;
+    }
   },
   
   getProductById: async (id: number): Promise<Product> => {
-    const { data, error } = await supabase
-      .from('purpleglass_products')
-      .select('*')
-      .eq('id', id)
-      .single();
-    
-    if (error) throw error;
-    
-    // Convert features to string[] if needed
-    return {
-      ...data,
-      features: Array.isArray(data.features) ? data.features : 
-               (typeof data.features === 'string' ? JSON.parse(data.features) : [])
-    };
+    try {
+      const { data, error } = await supabase
+        .from('purpleglass_products')
+        .select('*')
+        .eq('id', id)
+        .single();
+      
+      if (error) {
+        console.error(`Error fetching product with ID ${id}:`, error);
+        throw error;
+      }
+      
+      // Convert features to string[] if needed
+      return {
+        ...data,
+        features: Array.isArray(data.features) ? data.features : 
+                (typeof data.features === 'string' ? JSON.parse(data.features) : [])
+      };
+    } catch (error) {
+      console.error(`Error in getProductById for ID ${id}:`, error);
+      throw error;
+    }
   },
 };
 
@@ -56,7 +76,7 @@ export const ordersApi = {
       const { data: orderResult, error: orderError } = await supabase
         .from('purpleglass_orders')
         .insert({
-          customer_info: orderData.customer_info as any,  // Type assertion to avoid TypeScript errors
+          customer_info: orderData.customer_info,
           total: orderData.total,
           status: 'pending',
           order_date: new Date().toISOString()
@@ -80,7 +100,7 @@ export const ordersApi = {
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: item.product.id,
-        product_name: item.product.name, // Include the product name
+        product_name: item.product.name,
         quantity: item.quantity,
         price: item.product.price
       }));
@@ -123,20 +143,7 @@ export const ordersApi = {
       // When selecting from order_items, include the product_name field
       const { data: items, error: itemsError } = await supabase
         .from('purpleglass_order_items')
-        .select(`
-          id,
-          product_id,
-          product_name,
-          quantity,
-          price,
-          purpleglass_products (
-            id,
-            name,
-            price,
-            image,
-            category
-          )
-        `)
+        .select('*')
         .eq('order_id', id);
       
       if (itemsError) {
@@ -144,32 +151,39 @@ export const ordersApi = {
         throw itemsError;
       }
       
-      if (!items) {
+      if (!items || items.length === 0) {
         console.error("No items returned for order:", id);
-        throw new Error("No items found for order");
+        console.log("Returning order without items:", order);
+        // Return the order without items rather than throwing an error
+        return {
+          ...order,
+          items: []
+        };
       }
       
-      // Fix the structure of the order items - fixing the TypeScript errors here
-      // Using optional chaining and type checking to prevent TypeScript errors
+      // Format the items - using optional chaining for safety
       const formattedItems = items.map(item => ({
-        id: item?.id,
+        id: item.id,
         product: {
-          id: item?.product_id,
-          name: item?.product_name || "Unknown Product", // Use the stored product name
-          price: item?.price || 0,
-          image: item?.purpleglass_products?.image || "",
-          category: item?.purpleglass_products?.category || ""
+          id: item.product_id,
+          name: item.product_name || "Unknown Product",
+          price: item.price || 0,
+          image: "", // Default empty string for image
+          category: "" // Default empty string for category
         },
-        quantity: item?.quantity || 0,
-        price: item?.price || 0
+        quantity: item.quantity || 0,
+        price: item.price || 0
       }));
       
-      // Create a new object with the items property instead of modifying directly
+      console.log("Formatted items:", formattedItems);
+      
+      // Create a new object with the items property
       const fullOrder = {
         ...order,
         items: formattedItems
       };
       
+      console.log("Returning full order:", fullOrder);
       return fullOrder;
     } catch (error) {
       console.error("Error in getOrderById function:", error);

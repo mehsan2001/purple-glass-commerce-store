@@ -171,6 +171,105 @@ export type Database = {
         }
         Relationships: []
       }
+      purpleglass_order_items: {
+        Row: {
+          id: number
+          order_id: number | null
+          price: number
+          product_id: number | null
+          product_name: string
+          quantity: number
+        }
+        Insert: {
+          id?: number
+          order_id?: number | null
+          price: number
+          product_id?: number | null
+          product_name: string
+          quantity: number
+        }
+        Update: {
+          id?: number
+          order_id?: number | null
+          price?: number
+          product_id?: number | null
+          product_name?: string
+          quantity?: number
+        }
+        Relationships: [
+          {
+            foreignKeyName: "purpleglass_order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "purpleglass_orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "purpleglass_order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "purpleglass_products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      purpleglass_orders: {
+        Row: {
+          customer_info: Json
+          id: number
+          order_date: string | null
+          status: string | null
+          total: number
+        }
+        Insert: {
+          customer_info: Json
+          id?: number
+          order_date?: string | null
+          status?: string | null
+          total: number
+        }
+        Update: {
+          customer_info?: Json
+          id?: number
+          order_date?: string | null
+          status?: string | null
+          total?: number
+        }
+        Relationships: []
+      }
+      purpleglass_products: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          description: string | null
+          features: Json | null
+          id: number
+          image: string | null
+          name: string
+          price: number
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: number
+          image?: string | null
+          name: string
+          price: number
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          description?: string | null
+          features?: Json | null
+          id?: number
+          image?: string | null
+          name?: string
+          price?: number
+        }
+        Relationships: []
+      }
       solarcartitems: {
         Row: {
           created_at: string | null
