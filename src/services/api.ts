@@ -80,6 +80,7 @@ export const ordersApi = {
       const orderItems = orderData.items.map(item => ({
         order_id: orderId,
         product_id: item.product.id,
+        product_name: item.product.name, // Include the product name
         quantity: item.quantity,
         price: item.product.price
       }));
@@ -124,6 +125,7 @@ export const ordersApi = {
         .select(`
           id,
           product_id,
+          product_name,
           quantity,
           price,
           purpleglass_products (
@@ -146,7 +148,7 @@ export const ordersApi = {
         id: item.id,
         product: {
           id: item.product_id,
-          name: item.purpleglass_products?.name,
+          name: item.product_name, // Use the stored product name instead of relying on join
           price: item.price,
           image: item.purpleglass_products?.image,
           category: item.purpleglass_products?.category
